@@ -1,6 +1,17 @@
 require('dotenv').config()
+const { loadEnvironment } = require('./config/env')
+
+let env
+try {
+  env = loadEnvironment()
+} catch (error) {
+  console.error(error.message)
+  process.exit(1)
+}
+
 const express = require('express')
 const cors = require('cors')
+const mongoose = require('mongoose')
 const connectDB = require('./config/db')
 
 const authRoutes      = require('./routes/auth')
@@ -11,11 +22,8 @@ const errorHandler    = require('./middleware/errorHandler')
 
 const app = express()
 
-// Connect to MongoDB
-connectDB()
-
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }))
 app.use(express.json())
 
 // Routes
@@ -26,6 +34,9 @@ app.use('/api/timetable', timetableRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ status: 'error', message: 'Database is not ready' })
+  }
   res.json({ status: 'ok', message: 'Timetable Scheduler API is running' })
 })
 
@@ -37,7 +48,16 @@ app.use((req, res) => {
 // Global error handler
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
-})
+async function startServer() {
+  try {
+    await connectDB(env.MONGODB_URI)
+    app.listen(env.PORT, '0.0.0.0', () => {
+      console.log(`Server listening on port ${env.PORT}`)
+    })
+  } catch (error) {
+    console.error(`Server startup failed: ${error.message}`)
+    process.exit(1)
+  }
+}
+
+startServer()

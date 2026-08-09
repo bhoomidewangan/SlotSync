@@ -98,13 +98,14 @@ Create `Server/.env`:
 
 ```env
 PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb+srv://username:password@cluster/database
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER/DATABASE
+FRONTEND_URL=https://YOUR-FRONTEND-SERVICE.onrender.com
 
-JWT_SECRET=replace_with_a_long_random_secret
+JWT_SECRET=REPLACE_WITH_AT_LEAST_32_RANDOM_CHARACTERS
 JWT_EXPIRES_IN=7d
 
-GEMINI_API_KEY=replace_with_your_gemini_api_key
+GEMINI_API_KEY=REPLACE_WITH_YOUR_GEMINI_API_KEY
 GEMINI_MODEL=gemini-3.5-flash
 
 AI_REQUEST_TIMEOUT_MS=90000
@@ -115,7 +116,7 @@ AI_MAX_RESPONSE_BYTES=1000000
 AI_GENERATION_WINDOW_MS=60000
 AI_GENERATION_MAX_REQUESTS=5
 
-PROPOSAL_TOKEN_SECRET=replace_with_a_different_long_random_secret
+PROPOSAL_TOKEN_SECRET=REPLACE_WITH_A_DIFFERENT_32_CHARACTER_SECRET
 PROPOSAL_TOKEN_TTL=2h
 PROPOSAL_TOKEN_MAX_AGE=2h
 ```
@@ -123,7 +124,7 @@ PROPOSAL_TOKEN_MAX_AGE=2h
 Create `Client/.env`:
 
 ```env
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=https://YOUR-BACKEND-SERVICE.onrender.com
 VITE_API_TIMEOUT_MS=180000
 ```
 
@@ -134,6 +135,8 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 Run the command twice and use different values for `JWT_SECRET` and `PROPOSAL_TOKEN_SECRET`. Never commit `.env` files or expose the Gemini API key in frontend code.
+
+Replace every uppercase placeholder before deployment. Copying the example values unchanged intentionally fails startup or the frontend build. `FRONTEND_URL` belongs to the backend because it controls CORS. The frontend needs only `VITE_API_URL`, which points to the backend. Render supplies `PORT` automatically, so setting it manually there is optional.
 
 The selected Gemini model must show available RPD quota in Google AI Studio. A `429` response means the model's request or token quota has been exhausted. A `503` response normally means temporary provider demand.
 
@@ -155,13 +158,13 @@ Set-Location -LiteralPath "E:\Web Projects\SlotSync\Client"
 npm.cmd run dev
 ```
 
-Local addresses:
+Deployment addresses:
 
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:5000`
-- Health check: `http://localhost:5000/api/health`
+- Frontend: the value configured as `FRONTEND_URL`
+- Backend: the value configured as `VITE_API_URL`
+- Health check: `<VITE_API_URL>/api/health`
 
-The Vite development server is configured for port `3000`, not `5173`.
+For local development, use the same variables with your local frontend and backend URLs. The Vite development server uses port `3000`, not `5173`.
 
 ## Using the application
 
