@@ -32,6 +32,13 @@ test('loads and normalizes a complete production environment', () => {
   assert.ok(Object.isFrozen(env))
 })
 
+test('does not hardcode a provider-specific Gemini key prefix', () => {
+  assert.doesNotThrow(() => loadEnvironment({
+    ...validEnvironment,
+    GEMINI_API_KEY: 'new-format-gemini-key-1234567890',
+  }))
+})
+
 test('fails startup when required environment variables are missing', () => {
   assert.throws(
     () => loadEnvironment({ NODE_ENV: 'production' }),

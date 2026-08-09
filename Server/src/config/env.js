@@ -34,7 +34,8 @@ const environmentSchema = z.object({
     .refine((value) => !isPlaceholder(value), 'JWT_SECRET still contains a placeholder value.'),
   JWT_EXPIRES_IN: duration('JWT_EXPIRES_IN'),
   GEMINI_API_KEY: requiredText('GEMINI_API_KEY')
-    .regex(/^AIza[0-9A-Za-z_-]{20,}$/, 'GEMINI_API_KEY must be a valid Gemini API key.'),
+    .min(20, 'GEMINI_API_KEY appears too short.')
+    .refine((value) => !isPlaceholder(value), 'GEMINI_API_KEY still contains a placeholder value.'),
   GEMINI_MODEL: requiredText('GEMINI_MODEL'),
   AI_REQUEST_TIMEOUT_MS: positiveInteger('AI_REQUEST_TIMEOUT_MS'),
   AI_REPAIR_ATTEMPTS: nonNegativeInteger('AI_REPAIR_ATTEMPTS').max(2),
