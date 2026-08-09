@@ -1,9 +1,19 @@
 import axios from 'axios'
 
+const configuredBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const normalizedBaseUrl = configuredBaseUrl.replace(/\/+$/, '')
+const baseURL = normalizedBaseUrl.endsWith('/api')
+  ? normalizedBaseUrl
+  : `${normalizedBaseUrl}/api`
+const configuredTimeout = Number(import.meta.env.VITE_API_TIMEOUT_MS)
+const timeout = Number.isFinite(configuredTimeout) && configuredTimeout > 0
+  ? configuredTimeout
+  : 180000
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,
+  timeout,
 })
 
 // Attach token to every request automatically

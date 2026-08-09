@@ -3,9 +3,9 @@ const express = require('express')
 const cors = require('cors')
 const connectDB = require('./config/db')
 
+const authRoutes      = require('./routes/auth')
 const courseRoutes    = require('./routes/courses')
 const teacherRoutes   = require('./routes/teachers')
-const configRoutes    = require('./routes/config')
 const timetableRoutes = require('./routes/timetable')
 const errorHandler    = require('./middleware/errorHandler')
 
@@ -15,13 +15,13 @@ const app = express()
 connectDB()
 
 // Middleware
-app.use(cors({ origin: 'https://slot-sync-theta.vercel.app', credentials: true }))
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
 app.use(express.json())
 
 // Routes
+app.use('/api/auth',      authRoutes)
 app.use('/api/courses',   courseRoutes)
 app.use('/api/teachers',  teacherRoutes)
-app.use('/api/config',    configRoutes)
 app.use('/api/timetable', timetableRoutes)
 
 // Health check

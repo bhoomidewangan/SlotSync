@@ -7,27 +7,36 @@ const timetableSchema = new mongoose.Schema(
       ref: 'Department',
       required: true,
     },
-    config: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ScheduleConfig',
-      required: true,
-    },
     semester: {
       type: Number,
       required: true,
+      min: 1,
+      max: 8,
     },
     generatedAt: {
       type: Date,
       default: Date.now,
     },
-    // schedule is a 2D structure: { Monday: [ { slotIndex, label, isLunch, course, teacher } ], ... }
-    // Stored as Mixed because the shape varies with config
+    acceptedAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+    // Structured fixed-template schedule with course and teacher assignments.
     schedule: {
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
   },
   { timestamps: true }
+)
+
+timetableSchema.index(
+  {
+    department: 1,
+    semester: 1,
+  },
+  { unique: true }
 )
 
 module.exports = mongoose.model('Timetable', timetableSchema)

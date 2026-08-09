@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Users, CalendarDays, Settings } from 'lucide-react'
+import { BookOpen, Users, CalendarDays } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const cards = [
   { title: 'Teachers',   desc: 'Add and manage teachers and their subjects', icon: Users,        to: '/teachers',  color: 'text-blue-500' },
   { title: 'Courses',    desc: 'Add courses, assign teachers and sessions',  icon: BookOpen,     to: '/courses',   color: 'text-green-500' },
-  { title: 'Configure',  desc: 'Set time slots, lunch break and days',       icon: Settings,     to: '/configure', color: 'text-amber-500' },
   { title: 'Timetable',  desc: 'Generate and view the timetable',            icon: CalendarDays, to: '/timetable', color: 'text-purple-500' },
 ]
 
@@ -15,7 +14,7 @@ export default function Dashboard() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground mt-1">
-          Start by adding teachers, then courses, then configure your schedule.
+          Start by adding teachers and courses, then generate your timetable.
         </p>
       </div>
 
@@ -40,7 +39,7 @@ export default function Dashboard() {
         <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
           <li>Add all teachers with their subjects</li>
           <li>Add all courses for a semester</li>
-          <li>Go to Configure → set time slots and lunch break</li>
+          <li>Open Timetable and select the semester</li>
           <li>Click Generate Timetable</li>
         </ol>
       </div>

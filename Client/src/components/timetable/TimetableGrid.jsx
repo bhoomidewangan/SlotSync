@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { TIMETABLE_DAYS, TIMETABLE_DISPLAY_SLOTS } from '@/constants/timetableTemplate'
 
 const COLORS = [
   { bg: 'bg-blue-50',   border: 'border-blue-200',   text: 'text-blue-800',   dot: 'bg-blue-400' },
@@ -28,7 +29,9 @@ function buildCourseColorMap(days, slots, schedule) {
 }
 
 const TimetableGrid = forwardRef(function TimetableGrid({ timetable }, ref) {
-  const { days, slots, schedule } = timetable.schedule
+  const { schedule } = timetable.schedule
+  const days = TIMETABLE_DAYS
+  const slots = TIMETABLE_DISPLAY_SLOTS
 
   const colorMap = buildCourseColorMap(days, slots, schedule)
 

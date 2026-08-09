@@ -1,5 +1,7 @@
 const Course = require('../models/Course')
 const asyncWrapper = require('../middleware/asyncWrapper')
+const { assertTeacherBelongsToDepartment } = require('../services/ownershipService')
+const { assertCourseCanBeDeleted } = require('../services/deletionSafetyService')
 
 // GET /api/courses?semester=3
 const getAllCourses = asyncWrapper(async (req, res) => {
@@ -20,6 +22,7 @@ const getCourseById = asyncWrapper(async (req, res) => {
 // POST /api/courses
 const createCourse = asyncWrapper(async (req, res) => {
   const { name, semester, teacher, sessionsPerWeek, periodsPerSession } = req.body
+  await assertTeacherBelongsToDepartment({ teacherId: teacher, departmentId: req.department._id })
   const course = await Course.create({
     name, semester, teacher, sessionsPerWeek, periodsPerSession,
     department: req.department._id,
@@ -30,6 +33,10 @@ const createCourse = asyncWrapper(async (req, res) => {
 
 // PUT /api/courses/:id
 const updateCourse = asyncWrapper(async (req, res) => {
+  await assertTeacherBelongsToDepartment({
+    teacherId: req.body.teacher,
+    departmentId: req.department._id,
+  })
   const course = await Course.findOneAndUpdate(
     { _id: req.params.id, department: req.department._id },
     req.body,
@@ -41,6 +48,9 @@ const updateCourse = asyncWrapper(async (req, res) => {
 
 // DELETE /api/courses/:id
 const deleteCourse = asyncWrapper(async (req, res) => {
+  const ownedCourse = await Course.findOne({ _id: req.params.id, department: req.department._id })
+  if (!ownedCourse) return res.status(404).json({ message: 'Course not found' })
+  await assertCourseCanBeDeleted({ courseId: ownedCourse._id, departmentId: req.department._id })
   const course = await Course.findOneAndDelete({ _id: req.params.id, department: req.department._id })
   if (!course) return res.status(404).json({ message: 'Course not found' })
   res.json({ message: 'Course deleted' })

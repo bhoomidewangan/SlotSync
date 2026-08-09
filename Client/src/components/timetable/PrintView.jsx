@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { TIMETABLE_DAYS, TIMETABLE_DISPLAY_SLOTS } from '@/constants/timetableTemplate'
 
 const COLORS = [
   { bg: '#EFF6FF', border: '#BFDBFE', text: '#1E40AF' },
@@ -28,7 +29,9 @@ function buildColorMap(days, slots, schedule) {
 }
 
 const PrintView = forwardRef(function PrintView({ timetable, semester }, ref) {
-  const { days, slots, schedule } = timetable.schedule
+  const { schedule } = timetable.schedule
+  const days = TIMETABLE_DAYS
+  const slots = TIMETABLE_DISPLAY_SLOTS
   const colorMap = buildColorMap(days, slots, schedule)
 
   const cellStyle = {

@@ -6,7 +6,6 @@ import Register from '@/pages/Register'
 import Dashboard from '@/pages/Dashboard'
 import Courses from '@/pages/Courses'
 import Teachers from '@/pages/Teachers'
-import Configure from '@/pages/Configure'
 import Timetable from '@/pages/Timetable'
 
 export default function App() {
@@ -30,7 +29,6 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="teachers"  element={<Teachers />} />
           <Route path="courses"   element={<Courses />} />
-          <Route path="configure" element={<Configure />} />
           <Route path="timetable" element={<Timetable />} />
         </Route>
 

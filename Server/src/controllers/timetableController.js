@@ -1,43 +1,50 @@
 const Timetable = require('../models/Timetable')
-const ScheduleConfig = require('../models/ScheduleConfig')
 const asyncWrapper = require('../middleware/asyncWrapper')
-const { generateSchedule } = require('../algorithm')
+const { createTemporaryProposal } = require('../services/timetableProposalService')
+const { verifyProposalToken } = require('../services/proposalTokenService')
+const { acceptTimetableProposal } = require('../services/timetableAcceptanceService')
+const { deleteTimetableWithBookings } = require('../services/deletionSafetyService')
+
+function proposalSecret() {
+  return process.env.PROPOSAL_TOKEN_SECRET || process.env.JWT_SECRET
+}
 
 const generate = asyncWrapper(async (req, res) => {
-  const { configId } = req.body
-
-  const config = await ScheduleConfig.findOne({
-    _id: configId,
-    department: req.department._id,
-  }).populate({ path: 'courses', populate: { path: 'teacher', select: 'name _id' } })
-
-  if (!config) {
-    return res.status(404).json({ message: 'Config not found. Save a configuration first.' })
-  }
-
-  let result
-  try {
-    result = generateSchedule(config)
-  } catch (err) {
-    return res.status(422).json({ message: err.message })
-  }
-
-  await Timetable.deleteMany({ semester: config.semester, department: req.department._id })
-
-  const timetable = await Timetable.create({
-    config: config._id,
-    semester: config.semester,
-    generatedAt: new Date(),
-    schedule: result,
-    department: req.department._id,
+  const { semester } = req.body
+  const result = await createTemporaryProposal({
+    departmentId: req.department._id,
+    semester,
+    secret: proposalSecret(),
+    tokenExpiresIn: process.env.PROPOSAL_TOKEN_TTL,
   })
 
-  res.status(201).json(timetable)
+  res.status(200).json(result)
+})
+
+const accept = asyncWrapper(async (req, res) => {
+  const { semester, proposal, proposalToken } = req.body
+  const departmentId = req.department._id
+  const tokenPayload = verifyProposalToken({
+    token: proposalToken,
+    proposal,
+    departmentId,
+    semester,
+    secret: proposalSecret(),
+    maxAge: process.env.PROPOSAL_TOKEN_MAX_AGE || process.env.PROPOSAL_TOKEN_TTL,
+  })
+
+  const timetable = await acceptTimetableProposal({
+    departmentId,
+    semester,
+    proposal,
+    generatedAt: tokenPayload.generatedAt,
+  })
+
+  res.status(200).json(timetable)
 })
 
 const getTimetable = asyncWrapper(async (req, res) => {
   const timetable = await Timetable.findOne({ _id: req.params.id, department: req.department._id })
-    .populate('config')
   if (!timetable) return res.status(404).json({ message: 'Timetable not found' })
   res.json(timetable)
 })
@@ -47,15 +54,17 @@ const getTimetableBySemester = asyncWrapper(async (req, res) => {
   if (!semester) return res.status(400).json({ message: 'semester query param required' })
   const timetable = await Timetable.findOne({ semester: Number(semester), department: req.department._id })
     .sort({ generatedAt: -1 })
-    .populate('config')
   if (!timetable) return res.status(404).json({ message: 'No timetable found for this semester' })
   res.json(timetable)
 })
 
 const deleteTimetable = asyncWrapper(async (req, res) => {
-  const timetable = await Timetable.findOneAndDelete({ _id: req.params.id, department: req.department._id })
+  const timetable = await deleteTimetableWithBookings({
+    timetableId: req.params.id,
+    departmentId: req.department._id,
+  })
   if (!timetable) return res.status(404).json({ message: 'Timetable not found' })
   res.json({ message: 'Timetable deleted' })
 })
 
-module.exports = { generate, getTimetable, getTimetableBySemester, deleteTimetable }
+module.exports = { accept, generate, getTimetable, getTimetableBySemester, deleteTimetable }

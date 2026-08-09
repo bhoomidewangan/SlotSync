@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, BookOpen,
-  Settings, CalendarDays, GraduationCap, LogOut,
+  CalendarDays, GraduationCap, LogOut,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { Toaster } from '@/components/ui/toaster'
@@ -12,7 +12,6 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/teachers',  label: 'Teachers',  icon: Users },
   { to: '/courses',   label: 'Courses',   icon: BookOpen },
-  { to: '/configure', label: 'Configure', icon: Settings },
   { to: '/timetable', label: 'Timetable', icon: CalendarDays },
 ]
 

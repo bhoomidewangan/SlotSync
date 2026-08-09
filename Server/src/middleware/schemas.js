@@ -1,4 +1,5 @@
 const { z } = require('zod')
+const { scheduleProposalSchema } = require('../schemas/scheduleProposal')
 
 const registerSchema = z.object({
   name:     z.string().min(1, 'Department name is required').trim(),
@@ -39,30 +40,22 @@ const courseSchema = z.object({
     .max(3, 'Cannot exceed 3 consecutive periods'),
 })
 
-const configSchema = z.object({
-  semester: z.coerce.number().int().min(1).max(8),
-  workingDays: z
-    .array(
-      z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])
-    )
-    .min(1, 'Select at least one working day'),
-  startTime: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/, 'Start time must be in HH:MM format'),
-  periodDuration: z.coerce
+const generateSchema = z.object({
+  semester: z.coerce
     .number()
     .int()
-    .min(30, 'Minimum period duration is 30 minutes')
-    .max(90, 'Maximum period duration is 90 minutes'),
-  periodsBeforeLunch: z.coerce.number().int().min(1),
-  periodsAfterLunch: z.coerce.number().int().min(1),
-  lunchDuration: z.coerce.number().int().min(10).max(90).default(30),
-  lunchLabel: z.string().default('Lunch Break'),
-  courses: z.array(z.string()).default([]),
-})
+    .min(1, 'Semester must be between 1 and 8')
+    .max(8, 'Semester must be between 1 and 8'),
+}).strict()
 
-const generateSchema = z.object({
-  configId: z.string().min(1, 'configId is required'),
-})
+const acceptSchema = z.object({
+  semester: z.coerce
+    .number()
+    .int()
+    .min(1, 'Semester must be between 1 and 8')
+    .max(8, 'Semester must be between 1 and 8'),
+  proposal: scheduleProposalSchema,
+  proposalToken: z.string().min(1, 'Proposal token is required'),
+}).strict()
 
-module.exports = { teacherSchema, courseSchema, configSchema, generateSchema, registerSchema, loginSchema }
+module.exports = { acceptSchema, teacherSchema, courseSchema, generateSchema, registerSchema, loginSchema }
